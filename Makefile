@@ -1,0 +1,68 @@
+#
+BLAS_ROOT = /opt/OpenBLAS
+BLAS_INC_DIR = $(BLAS_ROOT)/include
+BLAS_LIB_DIR = $(BLAS_ROOT)/lib
+BLAS_LIBS = -lopenblas_seq
+#
+PLASMA_ROOT = /opt/PLASMA
+PLASMA_INC_DIR = $(PLASMA_ROOT)/include
+PLASMA_LIB_DIR = $(PLASMA_ROOT)/lib
+PLASMA_LIBS = -lplasma -lcoreblas -lquark 
+#
+TMATRIX_ROOT = /Users/stomo/WorkSpace/TileAlgorithm/TileMatrix
+TMATRIX_INC_DIR = $(TMATRIX_ROOT)
+TMATRIX_LIB_DIR = $(TMATRIX_ROOT)
+TMATRIX_LIBS = -lTileMatrix
+#
+COREBLAS_ROOT = /Users/stomo/WorkSpace/TileAlgorithm/CoreBlas
+COREBLAS_INC_DIR = $(COREBLAS_ROOT)
+COREBLAS_LIB_DIR = $(COREBLAS_ROOT)
+COREBLAS_LIBS = -lCoreBlasTile
+#
+CXX =	/usr/local/bin/g++ -fopenmp
+# for DEBUG
+CXXFLAGS =	-DDEBUG -g -I$(BLAS_INC_DIR) -I$(PLASMA_INC_DIR) -I$(TMATRIX_INC_DIR) -I$(COREBLAS_INC_DIR)
+# for Performance evaluation
+#CXXFLAGS =	-O2 -I$(BLAS_INC_DIR) -I$(PLASMA_INC_DIR) -I$(TMATRIX_INC_DIR) -I$(COREBLAS_INC_DIR)
+
+GEOBJS = KernelTuning.o GEQRT.o
+TSOBJS = KernelTuning.o TSQRT.o
+LAOBJS = KernelTuning.o LARFB.o
+SSOBJS = KernelTuning.o SSRFB.o
+
+LIBS =   
+
+TARGET = GEQRT TSQRT LARFB SSRFB
+
+GEQRT:	$(GEOBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(GEOBJS) \
+				-L$(TMATRIX_LIB_DIR) $(TMATRIX_LIBS) \
+				-L$(COREBLAS_LIB_DIR) $(COREBLAS_LIBS) \
+				-L$(PLASMA_LIB_DIR) $(PLASMA_LIBS) \
+				-L$(BLAS_LIB_DIR) $(BLAS_LIBS)
+
+TSQRT:	$(TSOBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(TSOBJS) \
+				-L$(TMATRIX_LIB_DIR) $(TMATRIX_LIBS) \
+				-L$(COREBLAS_LIB_DIR) $(COREBLAS_LIBS) \
+				-L$(PLASMA_LIB_DIR) $(PLASMA_LIBS) \
+				-L$(BLAS_LIB_DIR) $(BLAS_LIBS)
+
+LARFB:	$(LAOBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(LAOBJS) \
+				-L$(TMATRIX_LIB_DIR) $(TMATRIX_LIBS) \
+				-L$(COREBLAS_LIB_DIR) $(COREBLAS_LIBS) \
+				-L$(PLASMA_LIB_DIR) $(PLASMA_LIBS) \
+				-L$(BLAS_LIB_DIR) $(BLAS_LIBS)
+
+SSRFB:	$(SSOBJS)
+	$(CXX) $(CXXFLAGS) -o $@ $(SSOBJS) \
+				-L$(TMATRIX_LIB_DIR) $(TMATRIX_LIBS) \
+				-L$(COREBLAS_LIB_DIR) $(COREBLAS_LIBS) \
+				-L$(PLASMA_LIB_DIR) $(PLASMA_LIBS) \
+				-L$(BLAS_LIB_DIR) $(BLAS_LIBS)
+
+all:	$(TARGET)
+
+clean:
+	rm -f $(GEOBJS) $(TSOBJS) $(LAOBJS) $(SSOBJS) $(TARGET)
